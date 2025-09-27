@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.title }} - Sweetie{% endblock %}
+
+{% block content %}
+<section class="recipe-detail-section">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        <nav class="breadcrumbs">
+            <a href="{{ url_for('index') }}">Главная</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{{ url_for('recipes') }}">Рецепты</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{ recipe.title }}</span>
+        </nav>
+        
+        <div class="recipe-detail-container">
+            <!-- Основная информация о рецепте -->
+            <div class="recipe-main">
+                <div class="recipe-image-large">
+                    {% if recipe.image_path %}
+                        <img src="{{ url_for('static', filename='uploads/' + recipe.image_path) }}" alt="{{ recipe.title }}">
+                    {% else %}
+                        <div class="recipe-placeholder-large">
+                            <i class="fas fa-cookie-bite"></i>
+                            <p>Изображение не загружено</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="recipe-info">
+                    <h1 class="recipe-title-large">{{ recipe.title }}</h1>
+                    
+                    <div class="recipe-meta-large">
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>Автор: {{ recipe.author.username }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Время приготовления: {{ recipe.prep_time + recipe.cook_time if recipe.prep_time and recipe.cook_time else 'N/A' }} мин</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>Порций: {{ recipe.servings or 'N/A' }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Добавлено: {{ recipe.created_at.strftime('%d.%m.%Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-rating-large">
+                        <span class="rating-text" id="rating-text">
+                            {% set avg_rating = recipe.ratings|map(attribute='rating')|list %}
+                            {% if avg_rating %}
+                                {{ "%.1f"|format(avg_rating|sum / avg_rating|length) }} ({{ avg_rating|length }} отзывов)
+                            {% else %}
+                                Нет оценок
+                            {% endif %}
+                        </span>
+                        {% if session.user_id %}
+                        <div class="user-rating" id="user-rating" data-user-id="{{ session.user_id }}" data-recipe-id="{{ recipe.id }}">
+                            <span class="rating-label">Ваша оценка:</span>
+                            <div class="user-stars">
+                                {% set user_rating = recipe.ratings|selectattr('user_id', 'equalto', session.user_id)|first %}
+                                {% for i in range(5) %}
+                                    <i class="fas fa-star user-star {% if user_rating and i < user_rating.rating %}active{% endif %}" data-rating="{{ i + 1 }}"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="recipe-actions-large">
+                        {% if session.user_id %}
+                        <form method="POST" action="{{ url_for('add_favorite', recipe_id=recipe.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-heart"></i>
+                                Добавить в избранное
+                            </button>
+                        </form>
+                        <button class="btn btn-outline share-btn">
+                            <i class="fas fa-share"></i>
+                            Поделиться
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Описание рецепта -->
+            <div class="recipe-description-section">
+                <h2>Описание</h2>
+                <p>{{ recipe.description or 'Описание не указано' }}</p>
+            </div>
+            
+            <!-- Ингредиенты и инструкции -->
+            <div class="recipe-content-grid">
+                <!-- Ингредиенты -->
+                <div class="ingredients-section">
+                    <h2><i class="fas fa-list"></i> Ингредиенты</h2>
+                    <div class="ingredients-list">
+                        {% if ingredients %}
+                            {% for item in ingredients %}
+                            <div class="ingredient-item">
+                                <span class="ingredient-quantity">{{ item.quantity }} {{ item.ingredient.unit or '' }}</span>
+                                <span class="ingredient-name">{{ item.ingredient.name }}</span>
+                                {% if item.notes %}
+                                <span class="ingredient-notes">({{ item.notes }})</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-ingredients">Ингредиенты не указаны</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Инструкции -->
+                <div class="instructions-section">
+                    <h2><i class="fas fa-tasks"></i> Инструкции</h2>
+                    <div class="instructions-content">
+                        {% if recipe.instructions %}
+                            <div class="instruction-text">{{ recipe.instructions|replace('\n', '<br>')|safe }}</div>
+                        {% else %}
+                            <p class="no-instructions">Инструкции не указаны</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Комментарии -->
+            <div class="comments-section">
+                <h2><i class="fas fa-comments"></i> Комментарии ({{ comments|length }})</h2>
+                
+                {% if session.user_id %}
+                <div class="comment-form">
+                    <form method="POST" action="{{ url_for('add_comment', recipe_id=recipe.id) }}">
+                        <div class="form-group">
+                            <textarea name="content" class="form-textarea" placeholder="Оставьте свой комментарий..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Отправить комментарий
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="login-prompt">
+                    <p>Чтобы оставить комментарий, <a href="{{ url_for('login') }}">войдите в систему</a></p>
+                </div>
+                {% endif %}
+                
+                <div class="comments-list">
+                    {% for comment in comments %}
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <div class="comment-author">
+                                <i class="fas fa-user-circle"></i>
+                                <span>{{ comment.author.username }}</span>
+                            </div>
+                            <div class="comment-date">
+                                {{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            </div>
+                        </div>
+                        <div class="comment-content">
+                            {{ comment.content }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if not comments %}
+                    <div class="no-comments">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>Пока нет комментариев. Будьте первым!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Система оценки
+    const userStars = document.querySelectorAll('.user-star');
+    const recipeStars = document.querySelectorAll('.star');
+    const ratingText = document.getElementById('rating-text');
+    const userRating = document.getElementById('user-rating');
+    
+    // Инициализируем текущую оценку пользователя
+    let currentUserRating = 0;
+    userStars.forEach((star, index) => {
+        if (star.classList.contains('active')) {
+            currentUserRating = index + 1;
+        }
+    });
+    
+    // Обработка клика по звездам пользователя
+    userStars.forEach((star, index) => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            currentUserRating = rating;
+            updateUserStars(rating);
+            submitRating(rating);
+        });
+        
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            highlightUserStars(rating);
+        });
+    });
+    
+    // Сброс подсветки при уходе мыши
+    userRating.addEventListener('mouseleave', function() {
+        updateUserStars(currentUserRating);
+    });
+    
+    // Функция подсветки звезд пользователя
+    function highlightUserStars(rating) {
+        userStars.forEach((star, index) => {
+            if (index < rating) {
+                star.style.color = '#ffc107';
+            } else {
+                star.style.color = '#e9ecef';
+            }
+        });
+    }
+    
+    // Функция обновления звезд пользователя
+    function updateUserStars(rating) {
+        userStars.forEach((star, index) => {
+            if (index < rating) {
+                star.style.color = '#ffc107';
+                star.classList.add('active');
+            } else {
+                star.style.color = '#e9ecef';
+                star.classList.remove('active');
+            }
+        });
+    }
+    
+    // Функция отправки оценки
+    function submitRating(rating) {
+        const recipeId = userRating.dataset.recipeId;
+        const userId = userRating.dataset.userId;
+        
+        fetch('/rate_recipe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                recipe_id: recipeId,
+                rating: rating
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Обновляем отображение средней оценки
+                updateAverageRating(data.average_rating, data.total_ratings);
+            } else {
+                alert('Ошибка при сохранении оценки: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при сохранении оценки');
+        });
+    }
+    
+    // Функция обновления средней оценки
+    function updateAverageRating(average, total) {
+        if (total > 0) {
+            ratingText.textContent = `${average.toFixed(1)} (${total} отзывов)`;
+        } else {
+            ratingText.textContent = 'Нет оценок';
+        }
+    }
+    
+    // Обработка поделиться
+    const shareBtn = document.querySelector('.share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ recipe.title }}',
+                    text: 'Посмотрите этот рецепт на Sweetie',
+                    url: window.location.href
+                });
+            } else {
+                // Копирование ссылки в буфер обмена
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Ссылка скопирована в буфер обмена');
+                });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация - Sweetie{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2 class="auth-title">
+                        <i class="fas fa-user-plus"></i>
+                        Присоединяйтесь к нам!
+                    </h2>
+                    <p class="auth-subtitle">Создайте аккаунт и начните свое сладкое путешествие</p>
+                </div>
+                
+                <form class="auth-form" method="POST">
+                    <div class="form-group">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user"></i>
+                            Имя пользователя
+                        </label>
+                        <input type="text" id="username" name="username" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            Email адрес
+                        </label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock"></i>
+                            Пароль
+                        </label>
+                        <input type="password" id="password" name="password" class="form-input" required>
+                        <small class="form-help">Минимум 6 символов</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">
+                            <i class="fas fa-lock"></i>
+                            Подтвердите пароль
+                        </label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+                    </div>
+                    
+                    
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-user-plus"></i>
+                        Зарегистрироваться
+                    </button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>Уже есть аккаунт? <a href="{{ url_for('login') }}" class="auth-link">Войти</a></p>
+                </div>
+            </div>
+            
+            <div class="auth-info">
+                <div class="info-content">
+                    <h3>Что вас ждет?</h3>
+                    <ul class="info-list">
+                        <li><i class="fas fa-star"></i> Эксклюзивные рецепты от профессиональных кондитеров</li>
+                        <li><i class="fas fa-heart"></i> Возможность сохранять любимые рецепты</li>
+                        <li><i class="fas fa-comments"></i> Обсуждения и советы от сообщества</li>
+                        <li><i class="fas fa-trophy"></i> Участие в конкурсах и челленджах</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    
+    function validatePassword() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Пароли не совпадают');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    }
+    
+    password.addEventListener('change', validatePassword);
+    confirmPassword.addEventListener('keyup', validatePassword);
+});
+</script>
+{% endblock %}
+
+

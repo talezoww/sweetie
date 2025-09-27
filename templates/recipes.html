@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Рецепты - Sweetie{% endblock %}
+
+{% block content %}
+<section class="recipes-section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Наши рецепты</h1>
+            <p class="section-subtitle">Откройте для себя мир невероятных вкусов</p>
+        </div>
+        
+        <!-- Фильтры -->
+        <div class="filters">
+            <div class="filter-group">
+                <label for="search" class="filter-label">Поиск:</label>
+                <input type="text" id="search" class="filter-input" placeholder="Введите название рецепта...">
+            </div>
+            <div class="filter-group">
+                <label for="time" class="filter-label">Время приготовления:</label>
+                <select id="time" class="filter-select">
+                    <option value="">Любое время</option>
+                    <option value="30">До 30 минут</option>
+                    <option value="60">До 1 часа</option>
+                    <option value="120">До 2 часов</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Сетка рецептов -->
+        <div class="recipes-grid" id="recipes-grid">
+            {% for recipe in recipes %}
+            <div class="recipe-card" data-category="{{ recipe.category.name if recipe.category else '' }}" data-time="{{ recipe.prep_time + recipe.cook_time if recipe.prep_time and recipe.cook_time else 0 }}">
+                <div class="recipe-image">
+                    {% if recipe.image_path %}
+                        <img src="{{ url_for('static', filename='uploads/' + recipe.image_path) }}" alt="{{ recipe.title }}">
+                    {% else %}
+                        <div class="recipe-placeholder">
+                            <i class="fas fa-cookie-bite"></i>
+                        </div>
+                    {% endif %}
+                    <div class="recipe-overlay">
+                        <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="recipe-link">
+                            <i class="fas fa-eye"></i>
+                            Посмотреть рецепт
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="recipe-content">
+                    <div class="recipe-header">
+                        <h3 class="recipe-title">{{ recipe.title }}</h3>
+                        <div class="recipe-rating">
+                            <div class="stars">
+                                {% for i in range(5) %}
+                                    <i class="fas fa-star"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="rating-text">4.5 (23)</span>
+                        </div>
+                    </div>
+                    
+                    <p class="recipe-description">{{ recipe.description[:100] }}{% if recipe.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="recipe-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ recipe.prep_time + recipe.cook_time if recipe.prep_time and recipe.cook_time else 'N/A' }} мин</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ recipe.servings or 'N/A' }} порций</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>{{ recipe.author.username }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-actions">
+                        <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-book-open"></i>
+                            Читать рецепт
+                        </a>
+                        {% if session.user_id %}
+                        <button class="btn btn-outline btn-sm favorite-btn" data-recipe-id="{{ recipe.id }}">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Пагинация -->
+        <div class="pagination">
+            <button class="btn btn-outline" disabled>
+                <i class="fas fa-chevron-left"></i>
+                Предыдущая
+            </button>
+            <span class="pagination-info">Страница 1 из 1</span>
+            <button class="btn btn-outline" disabled>
+                Следующая
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const timeSelect = document.getElementById('time');
+    const recipesGrid = document.getElementById('recipes-grid');
+    const recipeCards = document.querySelectorAll('.recipe-card');
+    
+    function filterRecipes() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedTime = parseInt(timeSelect.value);
+        
+        recipeCards.forEach(card => {
+            const title = card.querySelector('.recipe-title').textContent.toLowerCase();
+            const time = parseInt(card.dataset.time) || 0;
+            
+            let show = true;
+            
+            // Поиск по названию
+            if (searchTerm && !title.includes(searchTerm)) {
+                show = false;
+            }
+            
+            // Фильтр по времени
+            if (selectedTime && time > selectedTime) {
+                show = false;
+            }
+            
+            card.style.display = show ? 'block' : 'none';
+        });
+    }
+    
+    searchInput.addEventListener('input', filterRecipes);
+    timeSelect.addEventListener('change', filterRecipes);
+    
+    // Обработка избранного
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const recipeId = this.dataset.recipeId;
+            // Здесь можно добавить AJAX запрос для добавления в избранное
+            this.classList.toggle('active');
+        });
+    });
+});
+</script>
+{% endblock %}
+
+

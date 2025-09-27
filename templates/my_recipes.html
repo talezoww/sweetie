@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Мои рецепты - Sweetie{% endblock %}
+
+{% block content %}
+<section class="my-recipes-section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Мои рецепты</h1>
+            <p class="section-subtitle">Управляйте своими кулинарными шедеврами</p>
+        </div>
+        
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ recipes|length }}</h3>
+                    <p>Всего рецептов</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>
+                        {% set total_ratings = [] %}
+                        {% for recipe in recipes %}
+                            {% for rating in recipe.ratings %}
+                                {% set _ = total_ratings.append(rating) %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ total_ratings|length }}
+                    </h3>
+                    <p>Получено оценок</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>
+                        {% set total_favorites = [] %}
+                        {% for recipe in recipes %}
+                            {% for favorite in recipe.favorites %}
+                                {% set _ = total_favorites.append(favorite) %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ total_favorites|length }}
+                    </h3>
+                    <p>Добавлено в избранное</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Кнопка добавления нового рецепта -->
+        <div class="add-recipe-section">
+            <a href="{{ url_for('add_recipe') }}" class="btn btn-primary btn-large">
+                <i class="fas fa-plus"></i>
+                Добавить новый рецепт
+            </a>
+        </div>
+        
+        <!-- Сетка рецептов -->
+        <div class="recipes-grid" id="recipes-grid">
+            {% for recipe in recipes %}
+            <div class="recipe-card" data-time="{{ recipe.prep_time + recipe.cook_time if recipe.prep_time and recipe.cook_time else 0 }}">
+                <div class="recipe-image">
+                    {% if recipe.image_path %}
+                        <img src="{{ url_for('static', filename='uploads/' + recipe.image_path) }}" alt="{{ recipe.title }}">
+                    {% else %}
+                        <div class="recipe-placeholder">
+                            <i class="fas fa-cookie-bite"></i>
+                            <p>Нет фото</p>
+                        </div>
+                    {% endif %}
+                    <div class="recipe-overlay">
+                        <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="recipe-link">
+                            <i class="fas fa-eye"></i>
+                            Посмотреть рецепт
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="recipe-content">
+                    <div class="recipe-header">
+                        <h3 class="recipe-title">{{ recipe.title }}</h3>
+                        <div class="recipe-rating">
+                            <span class="rating-text">
+                                {% set avg_rating = recipe.ratings|map(attribute='rating')|list %}
+                                {% if avg_rating %}
+                                    {{ "%.1f"|format(avg_rating|sum / avg_rating|length) }} ({{ avg_rating|length }} отзывов)
+                                {% else %}
+                                    Нет оценок
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <p class="recipe-description">{{ recipe.description[:100] }}{% if recipe.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="recipe-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ recipe.prep_time + recipe.cook_time if recipe.prep_time and recipe.cook_time else 'N/A' }} мин</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ recipe.servings or 'N/A' }} порций</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ recipe.created_at.strftime('%d.%m.%Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-actions">
+                        <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-book-open"></i>
+                            Читать рецепт
+                        </a>
+                        <button class="btn btn-danger btn-sm delete-recipe-btn" data-recipe-id="{{ recipe.id }}" data-recipe-title="{{ recipe.title }}">
+                            <i class="fas fa-trash"></i>
+                            Удалить
+                        </button>
+                        <div class="recipe-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-heart"></i>
+                                {{ recipe.favorites|length }}
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-comment"></i>
+                                {{ recipe.comments|length }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Сообщение если нет рецептов -->
+        {% if not recipes %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h3>У вас пока нет рецептов</h3>
+            <p>Создайте свой первый кулинарный шедевр и поделитесь им с сообществом!</p>
+            <a href="{{ url_for('add_recipe') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Добавить первый рецепт
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Анимация появления карточек
+    const recipeCards = document.querySelectorAll('.recipe-card');
+    
+    recipeCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Обработка удаления рецептов
+    const deleteButtons = document.querySelectorAll('.delete-recipe-btn');
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const recipeId = this.dataset.recipeId;
+            const recipeTitle = this.dataset.recipeTitle;
+            
+            // Подтверждение удаления
+            if (confirm(`Вы уверены, что хотите удалить рецепт "${recipeTitle}"?\n\nЭто действие нельзя отменить.`)) {
+                // Показываем индикатор загрузки
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+                this.disabled = true;
+                
+                // Отправляем запрос на удаление
+                fetch(`/delete_recipe/${recipeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Удаляем карточку с анимацией
+                        const card = this.closest('.recipe-card');
+                        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateX(-100%)';
+                        
+                        setTimeout(() => {
+                            card.remove();
+                            // Обновляем статистику
+                            updateStats();
+                        }, 300);
+                        
+                        // Показываем сообщение об успехе
+                        showMessage('Рецепт успешно удален!', 'success');
+                    } else {
+                        showMessage('Ошибка при удалении рецепта: ' + data.message, 'error');
+                        // Восстанавливаем кнопку
+                        this.innerHTML = '<i class="fas fa-trash"></i> Удалить';
+                        this.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showMessage('Произошла ошибка при удалении рецепта', 'error');
+                    // Восстанавливаем кнопку
+                    this.innerHTML = '<i class="fas fa-trash"></i> Удалить';
+                    this.disabled = false;
+                });
+            }
+        });
+    });
+    
+    // Функция обновления статистики
+    function updateStats() {
+        const remainingCards = document.querySelectorAll('.recipe-card');
+        const totalRecipes = document.querySelector('.stat-card:first-child h3');
+        if (totalRecipes) {
+            totalRecipes.textContent = remainingCards.length;
+        }
+    }
+    
+    // Функция показа сообщений
+    function showMessage(message, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flash-message flash-${type}`;
+        messageDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            ${message}
+            <button class="flash-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        const flashContainer = document.querySelector('.flash-messages') || createFlashContainer();
+        flashContainer.appendChild(messageDiv);
+        
+        // Автоматическое скрытие через 5 секунд
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // Создание контейнера для сообщений
+    function createFlashContainer() {
+        const container = document.createElement('div');
+        container.className = 'flash-messages';
+        document.body.appendChild(container);
+        return container;
+    }
+});
+</script>
+{% endblock %}
