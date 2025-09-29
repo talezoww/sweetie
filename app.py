@@ -86,6 +86,15 @@ def register():
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         user = User(username=username, email=email, password=hashed_password)
         db.session.add(user)
+        db.session.flush()  # Получаем ID пользователя
+        
+        # Создание профиля пользователя
+        user_profile = UserProfile(
+            user_id=user.id,
+            first_name=username,  # Используем username как first_name по умолчанию
+            bio="Новый пользователь Sweetie"
+        )
+        db.session.add(user_profile)
         db.session.commit()
         
         flash('Регистрация прошла успешно!', 'success')
