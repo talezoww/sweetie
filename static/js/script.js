@@ -355,6 +355,9 @@ function initStarRating() {
     const starContainers = document.querySelectorAll('.stars');
     
     starContainers.forEach(container => {
+        if (container.classList.contains('static-stars')) {
+            return; // пропускаем интерактив на статичных звездах
+        }
         const stars = container.querySelectorAll('i');
         
         stars.forEach((star, index) => {

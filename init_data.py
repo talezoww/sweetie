@@ -36,6 +36,7 @@ def init_database():
         user_profile = UserProfile(
             first_name='Тестовый',
             last_name='Пользователь',
+            phone='+375 (29) 123-45-67',
             bio='Люблю готовить сладости и делиться рецептами',
             user_id=test_user.id
         )
@@ -69,7 +70,9 @@ def init_database():
             {'name': 'Разрыхлитель', 'unit': 'г'},
             {'name': 'Ванилин', 'unit': 'г'},
             {'name': 'Какао-порошок', 'unit': 'г'},
-            {'name': 'Сметана', 'unit': 'г'}
+            {'name': 'Сметана', 'unit': 'г'},
+            {'name': 'Маскарпоне', 'unit': 'г'},
+            {'name': 'Кофе', 'unit': 'мл'}
         ]
         
         ingredients = {}

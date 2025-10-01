@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет - Sweetie{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2 class="auth-title">
+                        <i class="fas fa-user-cog"></i>
+                        Личный кабинет
+                    </h2>
+                    <p class="auth-subtitle">Обновите информацию вашего профиля</p>
+                </div>
+
+                <form class="auth-form" method="POST">
+                    <div class="form-group">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user"></i>
+                            Имя пользователя
+                        </label>
+                        <input type="text" id="username" name="username" class="form-input" value="{{ user.username }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </label>
+                        <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="first_name" class="form-label">
+                            <i class="fas fa-id-card"></i>
+                            Имя
+                        </label>
+                        <input type="text" id="first_name" name="first_name" class="form-input" value="{{ profile.first_name if profile else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name" class="form-label">
+                            <i class="fas fa-signature"></i>
+                            Фамилия
+                        </label>
+                        <input type="text" id="last_name" name="last_name" class="form-input" value="{{ profile.last_name if profile else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone" class="form-label">
+                            <i class="fas fa-phone"></i>
+                            Телефон
+                        </label>
+                        <input type="tel" id="phone" name="phone" class="form-input" value="{{ profile.phone if profile else '' }}" placeholder="+375 (__) ___-__-__">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio" class="form-label">
+                            <i class="fas fa-comment-dots"></i>
+                            О себе
+                        </label>
+                        <textarea id="bio" name="bio" class="form-textarea" rows="4" placeholder="Расскажите о себе...">{{ profile.bio if profile else '' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-save"></i>
+                        Сохранить изменения
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-info">
+                <div class="info-content">
+                    <h3>Советы</h3>
+                    <ul class="info-list">
+                        <li><i class="fas fa-check"></i> Заполняйте реальные контактные данные</li>
+                        <li><i class="fas fa-check"></i> Имя пользователя должно быть уникальным</li>
+                        <li><i class="fas fa-check"></i> Вы можете менять данные в любой момент</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+

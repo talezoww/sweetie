@@ -63,6 +63,8 @@ def register():
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
+        last_name = request.form.get('last_name')
+        phone = request.form.get('phone')
         
         # Валидация
         if not is_valid_email(email):
@@ -92,6 +94,8 @@ def register():
         user_profile = UserProfile(
             user_id=user.id,
             first_name=username,  # Используем username как first_name по умолчанию
+            last_name=last_name,
+            phone=phone,
             bio="Новый пользователь Sweetie"
         )
         db.session.add(user_profile)
@@ -101,6 +105,56 @@ def register():
         return redirect(url_for('login'))
     
     return render_template('register.html')
+
+@app.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    user = User.query.get_or_404(session['user_id'])
+    profile = user.profile
+    if request.method == 'POST':
+        # Обновление основных данных
+        new_username = request.form.get('username')
+        new_email = request.form.get('email')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        phone = request.form.get('phone')
+        bio = request.form.get('bio')
+
+        # Простая валидация
+        if new_email and not is_valid_email(new_email):
+            flash('Некорректный email адрес', 'error')
+            return render_template('account.html', user=user, profile=profile)
+
+        # Проверка уникальности email и username, если изменились
+        if new_email and new_email != user.email and User.query.filter_by(email=new_email).first():
+            flash('Пользователь с таким email уже существует', 'error')
+            return render_template('account.html', user=user, profile=profile)
+
+        if new_username and new_username != user.username and User.query.filter_by(username=new_username).first():
+            flash('Имя пользователя уже занято', 'error')
+            return render_template('account.html', user=user, profile=profile)
+
+        # Применяем изменения
+        if new_username:
+            user.username = new_username
+            session['username'] = new_username
+        if new_email:
+            user.email = new_email
+
+        if profile is None:
+            profile = UserProfile(user_id=user.id)
+            db.session.add(profile)
+
+        profile.first_name = first_name or profile.first_name
+        profile.last_name = last_name or profile.last_name
+        profile.phone = phone or profile.phone
+        profile.bio = bio or profile.bio
+
+        db.session.commit()
+        flash('Профиль обновлен', 'success')
+        return redirect(url_for('account'))
+
+    return render_template('account.html', user=user, profile=profile)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

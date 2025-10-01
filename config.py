@@ -20,7 +20,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Конфигурация для разработки"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'mysql+pymysql://root:password@localhost/sweetie_db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'sqlite:///sweetie.db'
 
 class ProductionConfig(Config):
     """Конфигурация для продакшена"""

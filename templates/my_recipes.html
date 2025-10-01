@@ -10,61 +10,6 @@
             <p class="section-subtitle">Управляйте своими кулинарными шедеврами</p>
         </div>
         
-        <!-- Статистика -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-book"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>{{ recipes|length }}</h3>
-                    <p>Всего рецептов</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>
-                        {% set total_ratings = [] %}
-                        {% for recipe in recipes %}
-                            {% for rating in recipe.ratings %}
-                                {% set _ = total_ratings.append(rating) %}
-                            {% endfor %}
-                        {% endfor %}
-                        {{ total_ratings|length }}
-                    </h3>
-                    <p>Получено оценок</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-heart"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>
-                        {% set total_favorites = [] %}
-                        {% for recipe in recipes %}
-                            {% for favorite in recipe.favorites %}
-                                {% set _ = total_favorites.append(favorite) %}
-                            {% endfor %}
-                        {% endfor %}
-                        {{ total_favorites|length }}
-                    </h3>
-                    <p>Добавлено в избранное</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Кнопка добавления нового рецепта -->
-        <div class="add-recipe-section">
-            <a href="{{ url_for('add_recipe') }}" class="btn btn-primary btn-large">
-                <i class="fas fa-plus"></i>
-                Добавить новый рецепт
-            </a>
-        </div>
-        
         <!-- Сетка рецептов -->
         <div class="recipes-grid" id="recipes-grid">
             {% for recipe in recipes %}
@@ -141,6 +86,61 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
+        
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ recipes|length }}</h3>
+                    <p>Всего рецептов</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>
+                        {% set total_ratings = [] %}
+                        {% for recipe in recipes %}
+                            {% for rating in recipe.ratings %}
+                                {% set _ = total_ratings.append(rating) %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ total_ratings|length }}
+                    </h3>
+                    <p>Получено оценок</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>
+                        {% set total_favorites = [] %}
+                        {% for recipe in recipes %}
+                            {% for favorite in recipe.favorites %}
+                                {% set _ = total_favorites.append(favorite) %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ total_favorites|length }}
+                    </h3>
+                    <p>Добавлено в избранное</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Кнопка добавления нового рецепта -->
+        <div class="add-recipe-section">
+            <a href="{{ url_for('add_recipe') }}" class="btn btn-primary btn-large">
+                <i class="fas fa-plus"></i>
+                Добавить новый рецепт
+            </a>
         </div>
         
         <!-- Сообщение если нет рецептов -->

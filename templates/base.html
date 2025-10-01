@@ -31,10 +31,13 @@
                     <a href="{{ url_for('my_recipes') }}" class="nav-link">Мои рецепты</a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url_for('account') }}" class="nav-link">Кабинет</a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url_for('favorites') }}" class="nav-link">Избранное</a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url_for('add_recipe') }}" class="nav-link">Добавить рецепт</a>
+                    <a href="{{ url_for('add_recipe') }}" class="nav-link">Добавить</a>
                 </li>
                 {% endif %}
             </ul>
@@ -42,7 +45,7 @@
             <div class="nav-auth">
                 {% if session.user_id %}
                     <div class="user-info">
-                        <span class="username">Привет, {{ session.username }}!</span>
+                        <span class="username">{{ session.username }}</span>
                         <a href="{{ url_for('logout') }}" class="btn-logout">Выйти</a>
                     </div>
                 {% else %}
@@ -103,12 +106,12 @@
                 </div>
                 <div class="footer-section">
                     <h4>Контакты</h4>
-                    <p><i class="fas fa-envelope"></i> info@sweetie.com</p>
-                    <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
+                    <p><i class="fab fa-telegram"></i> @scherrrbakova</p>
+                    <p><i class="fas fa-phone"></i> +375 44 518 0384</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Sweetie. Все права защищены.</p>
+                <p>&copy; 2025 Sweetie by scherrrbakova</p>
             </div>
         </div>
     </footer>
