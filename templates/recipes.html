@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Рецепты - Sweetie{% endblock %}
+
+{% block content %}
+<section class="recipes-section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Наши рецепты</h1>
+            <p class="section-subtitle">Откройте для себя мир невероятных вкусов</p>
+        </div>
+        
+        <!-- Фильтры -->
+        <div class="filters">
+            <form method="GET" class="filter-form">
+                <div class="filter-group">
+                    <label for="search" class="filter-label">Поиск:</label>
+                    <input type="text" id="search" name="search" class="filter-input" 
+                           placeholder="Введите название рецепта..." value="{{ search_query or '' }}">
+                </div>
+                <div class="filter-group">
+                    <label for="category" class="filter-label">Категория:</label>
+                    <select id="category" name="category" class="filter-select">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="time" class="filter-label">Время приготовления:</label>
+                    <select id="time" name="time" class="filter-select">
+                        <option value="">Любое время</option>
+                        <option value="30" {% if selected_time == 30 %}selected{% endif %}>До 30 минут</option>
+                        <option value="60" {% if selected_time == 60 %}selected{% endif %}>До 1 часа</option>
+                        <option value="120" {% if selected_time == 120 %}selected{% endif %}>До 2 часов</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Найти
+                    </button>
+                    <a href="{{ url_for('recipes') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Сбросить
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Сетка рецептов -->
+        <div class="recipes-grid" id="recipes-grid">
+            {% for recipe in recipes %}
+            <div class="recipe-card" data-category="{{ recipe.category.name if recipe.category else '' }}" data-time="{{ recipe.prep_time + recipe.cook_time if recipe.prep_time and recipe.cook_time else 0 }}">
+                <div class="recipe-image">
+                    {% if recipe.image_path %}
+                        <img src="{{ url_for('static', filename='uploads/' + recipe.image_path) }}" alt="{{ recipe.title }}">
+                    {% else %}
+                        <div class="recipe-placeholder">
+                            <i class="fas fa-cookie-bite"></i>
+                        </div>
+                    {% endif %}
+                    <div class="recipe-overlay">
+                        <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="recipe-link">
+                            <i class="fas fa-eye"></i>
+                            Посмотреть рецепт
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="recipe-content">
+                    <div class="recipe-header">
+                        <h3 class="recipe-title">{{ recipe.title }}</h3>
+                        {% if recipe.category %}
+                        <div class="recipe-category">
+                            <i class="fas fa-folder"></i>
+                            {{ recipe.category.name }}
+                        </div>
+                        {% endif %}
+                        <div class="recipe-rating">
+                            <div class="stars static-stars">
+                                {% set ratings = recipe.ratings|map(attribute='rating')|list %}
+                                {% set avg = (ratings|sum / ratings|length) if ratings else 0 %}
+                                {% for i in range(5) %}
+                                    <i class="fas fa-star {% if i < avg|round(0, 'floor') %}active{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="rating-text">
+                                {% if ratings %}
+                                    {{ "%.1f"|format(avg) }} ({{ ratings|length }})
+                                {% else %}
+                                    Нет оценок
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <p class="recipe-description">{{ recipe.description[:100] }}{% if recipe.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="recipe-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ recipe.prep_time + recipe.cook_time if recipe.prep_time and recipe.cook_time else 'N/A' }} мин</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ recipe.servings or 'N/A' }} порций</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>{{ recipe.author.username }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-actions">
+                        <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-book-open"></i>
+                            Читать рецепт
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Пагинация -->
+        <div class="pagination">
+            <button class="btn btn-outline" disabled>
+                <i class="fas fa-chevron-left"></i>
+                Предыдущая
+            </button>
+            <span class="pagination-info">Страница 1 из 1</span>
+            <button class="btn btn-outline" disabled>
+                Следующая
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const timeSelect = document.getElementById('time');
+    const recipesGrid = document.getElementById('recipes-grid');
+    const recipeCards = document.querySelectorAll('.recipe-card');
+    
+    function filterRecipes() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedTime = parseInt(timeSelect.value);
+        
+        recipeCards.forEach(card => {
+            const title = card.querySelector('.recipe-title').textContent.toLowerCase();
+            const time = parseInt(card.dataset.time) || 0;
+            
+            let show = true;
+            
+            // Поиск по названию
+            if (searchTerm && !title.includes(searchTerm)) {
+                show = false;
+            }
+            
+            // Фильтр по времени
+            if (selectedTime && time > selectedTime) {
+                show = false;
+            }
+            
+            card.style.display = show ? 'block' : 'none';
+        });
+    }
+    
+    searchInput.addEventListener('input', filterRecipes);
+    timeSelect.addEventListener('change', filterRecipes);
+});
+</script>
+{% endblock %}
+
+

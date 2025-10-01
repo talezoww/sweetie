@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Sweetie - Мир кондитерских изделий{% endblock %}
+
+{% block content %}
+<!-- Героическая секция -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">
+                <span class="title-main">Добро пожаловать в мир</span>
+                <span class="title-highlight">сладких наслаждений</span>
+            </h1>
+            <p class="hero-description">
+                Откройте для себя удивительный мир кондитерских изделий, где каждый рецепт — это произведение искусства, 
+                а каждый десерт — это история, рассказанная через вкус. Наша платформа объединяет любителей сладкого 
+                со всего мира, создавая сообщество, где делиться рецептами так же естественно, как наслаждаться ими.
+            </p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('recipes') }}" class="btn btn-primary">
+                    <i class="fas fa-utensils"></i>
+                    Исследовать рецепты
+                </a>
+                {% if not session.user_id %}
+                <a href="{{ url_for('register') }}" class="btn btn-secondary">
+                    <i class="fas fa-user-plus"></i>
+                    Присоединиться к нам
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="hero-image-container">
+                <i class="fas fa-cake hero-icon"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Секция о кондитерских изделиях -->
+<section class="about-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Искусство кондитерских изделий</h2>
+            <p class="section-subtitle">От традиционных рецептов до современных шедевров</p>
+        </div>
+        
+        <div class="about-content">
+            <div class="about-text">
+                <h3>Магия сладкого искусства</h3>
+                <p>
+                    Кондитерские изделия — это не просто еда, это эмоции, воспоминания и радость, 
+                    воплощенные в сладких формах. Каждое пирожное, торт, печенье или конфета несет 
+                    в себе частичку души создателя и способно подарить незабываемые моменты счастья.
+                </p>
+                
+                <h3>Традиции и инновации</h3>
+                <p>
+                    На протяжении веков кондитеры совершенствовали свое мастерство, передавая секреты 
+                    из поколения в поколение. Сегодня мы сочетаем проверенные временем традиции с 
+                    современными техниками и ингредиентами, создавая уникальные вкусовые сочетания 
+                    и визуальные эффекты, которые поражают воображение.
+                </p>
+                
+                <h3>Наука и творчество</h3>
+                <p>
+                    Кондитерское дело — это удивительное сочетание точной науки и безграничного творчества. 
+                    Здесь важна каждая деталь: от точности измерений до температуры духовки, от выбора 
+                    ингредиентов до техники украшения. Но самое главное — это страсть к созданию 
+                    прекрасного и желание делиться радостью с окружающими.
+                </p>
+            </div>
+            
+            <div class="about-features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h4>Сделано с любовью</h4>
+                    <p>Каждый рецепт создается с особой заботой и вниманием к деталям</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h4>Проверенные рецепты</h4>
+                    <p>Все рецепты протестированы и одобрены нашим сообществом</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Сообщество единомышленников</h4>
+                    <p>Присоединяйтесь к тысячам любителей кондитерского искусства</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Секция категорий -->
+<section class="categories-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Популярные категории</h2>
+            <p class="section-subtitle">Найдите рецепт для любого случая</p>
+        </div>
+        
+        <div class="categories-grid">
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-birthday-cake"></i>
+                </div>
+                <h3>Торты</h3>
+                <p>Праздничные и повседневные торты на любой вкус</p>
+            </div>
+            
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-cookie"></i>
+                </div>
+                <h3>Печенье</h3>
+                <p>Хрустящее печенье и мягкие кексы</p>
+            </div>
+            
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-ice-cream"></i>
+                </div>
+                <h3>Десерты</h3>
+                <p>Холодные и горячие десерты</p>
+            </div>
+            
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-candy-cane"></i>
+                </div>
+                <h3>Конфеты</h3>
+                <p>Домашние конфеты и сладости</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Призыв к действию -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Готовы начать свое сладкое путешествие?</h2>
+            <p>Присоединяйтесь к нашему сообществу и откройте мир невероятных вкусов</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('recipes') }}" class="btn btn-primary btn-large">
+                    <i class="fas fa-search"></i>
+                    Найти рецепт
+                </a>
+                {% if not session.user_id %}
+                <a href="{{ url_for('register') }}" class="btn btn-outline btn-large">
+                    <i class="fas fa-user-plus"></i>
+                    Создать аккаунт
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+

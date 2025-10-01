@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Избранные рецепты - Sweetie{% endblock %}
+
+{% block content %}
+<section class="favorites-section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Мои избранные рецепты</h1>
+            <p class="section-subtitle">Рецепты, которые вы сохранили для себя</p>
+        </div>
+        
+        {% if recipes %}
+        <div class="recipes-grid">
+            {% for recipe in recipes %}
+            <div class="recipe-card">
+                <div class="recipe-image">
+                    {% if recipe.image_path %}
+                        <img src="{{ url_for('static', filename='uploads/' + recipe.image_path) }}" alt="{{ recipe.title }}">
+                    {% else %}
+                        <div class="recipe-placeholder">
+                            <i class="fas fa-cookie-bite"></i>
+                        </div>
+                    {% endif %}
+                    <div class="recipe-overlay">
+                        <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="recipe-link">
+                            <i class="fas fa-eye"></i>
+                            Посмотреть рецепт
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="recipe-content">
+                    <div class="recipe-header">
+                        <h3 class="recipe-title">{{ recipe.title }}</h3>
+                        <div class="recipe-rating">
+                            <div class="stars">
+                                {% for i in range(5) %}
+                                    <i class="fas fa-star"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="rating-text">4.5 (23)</span>
+                        </div>
+                    </div>
+                    
+                    <p class="recipe-description">{{ recipe.description[:100] }}{% if recipe.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="recipe-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ recipe.prep_time + recipe.cook_time if recipe.prep_time and recipe.cook_time else 'N/A' }} мин</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ recipe.servings or 'N/A' }} порций</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>{{ recipe.author.username }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-actions">
+                        <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-book-open"></i>
+                            Читать рецепт
+                        </a>
+                        <form method="POST" action="{{ url_for('remove_favorite', recipe_id=recipe.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-outline btn-sm">
+                                <i class="fas fa-heart-broken"></i>
+                                Удалить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-favorites">
+            <div class="empty-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h3>Пока нет избранных рецептов</h3>
+            <p>Добавьте рецепты в избранное, чтобы они отображались здесь</p>
+            <a href="{{ url_for('recipes') }}" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                Найти рецепты
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Подтверждение удаления из избранного
+    document.querySelectorAll('form[action*="remove_favorite"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('Вы уверены, что хотите удалить этот рецепт из избранного?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

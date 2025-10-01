@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить рецепт - Sweetie{% endblock %}
+
+{% block content %}
+<section class="add-recipe-section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Добавить новый рецепт</h1>
+            <p class="section-subtitle">Поделитесь своим кулинарным шедевром с сообществом</p>
+        </div>
+        
+        <div class="add-recipe-container">
+            <form class="add-recipe-form" method="POST" enctype="multipart/form-data">
+                <!-- Основная информация -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Основная информация
+                    </h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="title" class="form-label required">
+                                <i class="fas fa-tag"></i>
+                                Название рецепта
+                            </label>
+                            <input type="text" id="title" name="title" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left"></i>
+                                Описание
+                            </label>
+                            <textarea id="description" name="description" class="form-textarea" rows="4" placeholder="Краткое описание вашего рецепта..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category_id" class="form-label">
+                                <i class="fas fa-folder"></i>
+                                Категория
+                            </label>
+                            <select id="category_id" name="category_id" class="form-select">
+                                <option value="">Выберите категорию (необязательно)</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="image" class="form-label">
+                                <i class="fas fa-image"></i>
+                                Фотография блюда
+                            </label>
+                            <input type="file" id="image" name="image" class="form-file" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Время и порции -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <i class="fas fa-clock"></i>
+                        Время и порции
+                    </h2>
+                    
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label for="prep_time" class="form-label">
+                                <i class="fas fa-clock"></i>
+                                Время подготовки (мин)
+                            </label>
+                            <input type="number" id="prep_time" name="prep_time" class="form-input" min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cook_time" class="form-label">
+                                <i class="fas fa-fire"></i>
+                                Время приготовления (мин)
+                            </label>
+                            <input type="number" id="cook_time" name="cook_time" class="form-input" min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="servings" class="form-label">
+                                <i class="fas fa-users"></i>
+                                Количество порций
+                            </label>
+                            <input type="number" id="servings" name="servings" class="form-input" min="1">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ингредиенты -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <i class="fas fa-list"></i>
+                        Ингредиенты
+                    </h2>
+                    
+                    <div class="ingredients-container">
+                        <div class="ingredient-item">
+                            <div class="ingredient-inputs">
+                                <input type="text" name="ingredient_name[]" class="form-input" placeholder="Название ингредиента">
+                                <input type="number" name="ingredient_quantity[]" class="form-input" placeholder="Количество" step="0.1">
+                                <input type="text" name="ingredient_unit[]" class="form-input" placeholder="Единица измерения">
+                            </div>
+                            <button type="button" class="btn btn-outline btn-sm remove-ingredient">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline add-ingredient">
+                        <i class="fas fa-plus"></i>
+                        Добавить ингредиент
+                    </button>
+                </div>
+                
+                <!-- Инструкции -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <i class="fas fa-tasks"></i>
+                        Инструкции приготовления
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label for="instructions" class="form-label required">
+                            <i class="fas fa-list-ol"></i>
+                            Пошаговые инструкции
+                        </label>
+                        <textarea id="instructions" name="instructions" class="form-textarea" rows="10" required placeholder="Опишите подробно процесс приготовления..."></textarea>
+                        <small class="form-help">Опишите каждый шаг приготовления подробно</small>
+                    </div>
+                </div>
+                
+                <!-- Дополнительные настройки -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <i class="fas fa-cog"></i>
+                        Дополнительные настройки
+                    </h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="is_public" checked>
+                                <span class="checkmark"></span>
+                                Сделать рецепт публичным
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Кнопки отправки -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="history.back()">
+                        <i class="fas fa-arrow-left"></i>
+                        Отмена
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Сохранить рецепт
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Добавление ингредиентов
+    const addIngredientBtn = document.querySelector('.add-ingredient');
+    const ingredientsContainer = document.querySelector('.ingredients-container');
+    
+    addIngredientBtn.addEventListener('click', function() {
+        const ingredientItem = document.createElement('div');
+        ingredientItem.className = 'ingredient-item';
+        ingredientItem.innerHTML = `
+            <div class="ingredient-inputs">
+                <input type="text" name="ingredient_name[]" class="form-input" placeholder="Название ингредиента">
+                <input type="number" name="ingredient_quantity[]" class="form-input" placeholder="Количество" step="0.1">
+                <input type="text" name="ingredient_unit[]" class="form-input" placeholder="Единица измерения">
+            </div>
+            <button type="button" class="btn btn-outline btn-sm remove-ingredient">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        ingredientsContainer.appendChild(ingredientItem);
+        
+        // Добавляем обработчик для удаления
+        const removeBtn = ingredientItem.querySelector('.remove-ingredient');
+        removeBtn.addEventListener('click', function() {
+            ingredientItem.remove();
+        });
+    });
+    
+    // Удаление ингредиентов
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-ingredient')) {
+            e.target.closest('.ingredient-item').remove();
+        }
+    });
+    
+    // Валидация формы
+    const form = document.querySelector('.add-recipe-form');
+    form.addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value.trim();
+        const instructions = document.getElementById('instructions').value.trim();
+        
+        if (!title) {
+            e.preventDefault();
+            alert('Пожалуйста, введите название рецепта');
+            return;
+        }
+        
+        if (!instructions) {
+            e.preventDefault();
+            alert('Пожалуйста, введите инструкции приготовления');
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}
+
+
