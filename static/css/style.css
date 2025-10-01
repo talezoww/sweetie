@@ -782,16 +782,43 @@ body {
     align-items: end;
 }
 
+.filter-form {
+    display: flex;
+    gap: 20px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    min-width: 150px;
 }
 
 .filter-label {
     font-weight: 500;
     color: #8B7355;
     font-size: 14px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+}
+
+.recipe-category {
+    background: rgba(212, 196, 168, 0.2);
+    color: #8B7355;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 5px;
 }
 
 .filter-input, .filter-select {

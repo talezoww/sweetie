@@ -12,19 +12,43 @@
         
         <!-- Фильтры -->
         <div class="filters">
-            <div class="filter-group">
-                <label for="search" class="filter-label">Поиск:</label>
-                <input type="text" id="search" class="filter-input" placeholder="Введите название рецепта...">
-            </div>
-            <div class="filter-group">
-                <label for="time" class="filter-label">Время приготовления:</label>
-                <select id="time" class="filter-select">
-                    <option value="">Любое время</option>
-                    <option value="30">До 30 минут</option>
-                    <option value="60">До 1 часа</option>
-                    <option value="120">До 2 часов</option>
-                </select>
-            </div>
+            <form method="GET" class="filter-form">
+                <div class="filter-group">
+                    <label for="search" class="filter-label">Поиск:</label>
+                    <input type="text" id="search" name="search" class="filter-input" 
+                           placeholder="Введите название рецепта..." value="{{ search_query or '' }}">
+                </div>
+                <div class="filter-group">
+                    <label for="category" class="filter-label">Категория:</label>
+                    <select id="category" name="category" class="filter-select">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="time" class="filter-label">Время приготовления:</label>
+                    <select id="time" class="filter-select">
+                        <option value="">Любое время</option>
+                        <option value="30">До 30 минут</option>
+                        <option value="60">До 1 часа</option>
+                        <option value="120">До 2 часов</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Найти
+                    </button>
+                    <a href="{{ url_for('recipes') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Сбросить
+                    </a>
+                </div>
+            </form>
         </div>
         
         <!-- Сетка рецептов -->
@@ -50,6 +74,12 @@
                 <div class="recipe-content">
                     <div class="recipe-header">
                         <h3 class="recipe-title">{{ recipe.title }}</h3>
+                        {% if recipe.category %}
+                        <div class="recipe-category">
+                            <i class="fas fa-folder"></i>
+                            {{ recipe.category.name }}
+                        </div>
+                        {% endif %}
                         <div class="recipe-rating">
                             <div class="stars static-stars">
                                 {% set ratings = recipe.ratings|map(attribute='rating')|list %}

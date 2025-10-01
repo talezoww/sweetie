@@ -182,8 +182,31 @@ def logout():
 
 @app.route('/recipes')
 def recipes():
-    recipes = Recipe.query.all()
-    return render_template('recipes.html', recipes=recipes)
+    # Получаем параметры фильтрации
+    category_id = request.args.get('category', type=int)
+    search_query = request.args.get('search', '')
+    
+    # Базовый запрос
+    query = Recipe.query
+    
+    # Фильтрация по категории
+    if category_id:
+        query = query.filter_by(category_id=category_id)
+    
+    # Поиск по названию и описанию
+    if search_query:
+        query = query.filter(
+            db.or_(
+                Recipe.title.contains(search_query),
+                Recipe.description.contains(search_query)
+            )
+        )
+    
+    recipes = query.all()
+    categories = Category.query.all()
+    
+    return render_template('recipes.html', recipes=recipes, categories=categories, 
+                         selected_category=category_id, search_query=search_query)
 
 @app.route('/recipe/<int:recipe_id>')
 def recipe_detail(recipe_id):
@@ -202,6 +225,7 @@ def add_recipe():
         prep_time = request.form['prep_time']
         cook_time = request.form['cook_time']
         servings = request.form['servings']
+        category_id = request.form.get('category_id') or None
         
         # Обработка загрузки изображения
         image_path = None
@@ -226,7 +250,8 @@ def add_recipe():
             cook_time=cook_time,
             servings=servings,
             image_path=image_path,
-            user_id=session['user_id']
+            user_id=session['user_id'],
+            category_id=category_id
         )
         
         db.session.add(recipe)
@@ -260,7 +285,9 @@ def add_recipe():
         flash('Рецепт успешно добавлен!', 'success')
         return redirect(url_for('recipes'))
     
-    return render_template('add_recipe.html')
+    # Получаем все категории для отображения в форме
+    categories = Category.query.all()
+    return render_template('add_recipe.html', categories=categories)
 
 @app.route('/add_comment/<int:recipe_id>', methods=['POST'])
 @login_required
