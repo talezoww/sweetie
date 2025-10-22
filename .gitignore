@@ -142,5 +142,13 @@ Thumbs.db
 # Project specific
 static/uploads/*
 !static/uploads/.gitkeep
+
+# SQLite files (NOT SUPPORTED - MySQL ONLY!)
 *.db
 *.sqlite
+*.sqlite3
+instance/
+
+# MySQL Workbench files
+*.mwb
+*.mwb.bak

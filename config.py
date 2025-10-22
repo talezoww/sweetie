@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 
 class Config:
-    """Базовая конфигурация"""
+    """Базовая конфигурация для MySQL"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key-change-this-in-production'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql+pymysql://root:password@localhost/sweetie_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -18,19 +18,19 @@ class Config:
     COMMENTS_PER_PAGE = 10
 
 class DevelopmentConfig(Config):
-    """Конфигурация для разработки"""
+    """Конфигурация для разработки (MySQL)"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'sqlite:///sweetie.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'mysql+pymysql://root:password@localhost/sweetie_db'
 
 class ProductionConfig(Config):
-    """Конфигурация для продакшена"""
+    """Конфигурация для продакшена (MySQL)"""
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql+pymysql://root:password@localhost/sweetie_db'
 
 class TestingConfig(Config):
-    """Конфигурация для тестирования"""
+    """Конфигурация для тестирования (MySQL)"""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'mysql+pymysql://root:password@localhost/sweetie_test_db'
     WTF_CSRF_ENABLED = False
 
 # Словарь конфигураций
@@ -40,5 +40,3 @@ config = {
     'testing': TestingConfig,
     'default': DevelopmentConfig
 }
-
-
