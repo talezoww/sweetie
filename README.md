@@ -74,67 +74,71 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 4. Настройка базы данных MySQL
+#### 4. Настройка базы данных MySQL через MySQL Workbench
 
-**4.1. Установка MySQL:**
+**4.1. Установка MySQL и MySQL Workbench:**
 
-**Для Windows:**
-- Скачайте MySQL с [mysql.com](https://dev.mysql.com/downloads/mysql/)
-- Или установите XAMPP (включает MySQL, Apache, PHP)
-- Запустите MySQL сервер
+**Для Windows (рекомендуется):**
+1. Скачайте **MySQL Installer** с [mysql.com](https://dev.mysql.com/downloads/installer/)
+2. Выберите "MySQL Server" + "MySQL Workbench" при установке
+3. Или установите XAMPP (включает MySQL) + отдельно MySQL Workbench
 
 **Для Linux:**
 ```bash
 # Ubuntu/Debian
 sudo apt-get update
-sudo apt-get install mysql-server
+sudo apt-get install mysql-server mysql-workbench
 
 # CentOS/RHEL
-sudo yum install mysql-server
+sudo yum install mysql-server mysql-workbench
 ```
 
 **Для macOS:**
 ```bash
-brew install mysql
+brew install mysql mysql-workbench
 ```
 
-**4.2. Автоматическая настройка базы данных:**
+**4.2. Настройка через MySQL Workbench (РЕКОМЕНДУЕТСЯ):**
 
-Используйте автоматический скрипт настройки:
+1. **Запустите MySQL Workbench**
+2. **Создайте новое подключение:**
+   - Hostname: `localhost`
+   - Port: `3306`
+   - Username: `root` (или ваш пользователь)
+   - Password: ваш пароль MySQL
+   - Test Connection → OK
+
+3. **Создайте базу данных:**
+   - Откройте подключение
+   - Выполните SQL команды:
+   ```sql
+   CREATE DATABASE sweetie_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   USE sweetie_db;
+   ```
+
+4. **Импортируйте структуру базы данных:**
+   - File → Open SQL Script
+   - Выберите файл `create_database.sql` из проекта
+   - Выполните скрипт (Ctrl+Shift+Enter)
+
+5. **Проверьте созданные таблицы:**
+   ```sql
+   SHOW TABLES;
+   ```
+
+**4.3. Автоматическая настройка (альтернатива):**
+
+Если предпочитаете автоматическую настройку:
 ```bash
 python setup_mysql.py
 ```
 
-Этот скрипт:
-- Запросит данные подключения к MySQL
-- Создаст базу данных `sweetie_db`
-- Создаст все необходимые таблицы
-- Настроит конфигурацию проекта
-- Добавит тестовые данные
+**4.4. Настройка подключения в проекте:**
 
-**4.3. Ручная настройка (альтернативный способ):**
-
-Создайте базу данных вручную:
-```sql
-CREATE DATABASE sweetie_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'sweetie_user'@'localhost' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON sweetie_db.* TO 'sweetie_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-Затем выполните:
-```bash
-# Создание таблиц
-python create_tables.py
-
-# Или используйте SQL скрипт
-python setup_database.py
-```
-
-**4.4. Настройка подключения к базе данных:**
 Отредактируйте файл `config.py`:
 ```python
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://sweetie_user:your_password@localhost/sweetie_db'
+# Замените на ваши данные из MySQL Workbench
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:your_password@localhost/sweetie_db'
 ```
 
 #### 5. Инициализация данных
@@ -224,7 +228,7 @@ chmod 755 static/uploads
 
 ## Быстрый старт
 
-### Для новых пользователей (рекомендуется):
+### 🚀 Для новых пользователей (через MySQL Workbench):
 
 1. **Клонируйте репозиторий:**
 ```bash
@@ -232,7 +236,19 @@ git clone https://github.com/talezoww/sweetie.git
 cd sweetie
 ```
 
-2. **Установите зависимости:**
+2. **Установите MySQL и MySQL Workbench:**
+   - Windows: [MySQL Installer](https://dev.mysql.com/downloads/installer/)
+   - Linux: `sudo apt-get install mysql-server mysql-workbench`
+   - macOS: `brew install mysql mysql-workbench`
+
+3. **Настройте базу данных в MySQL Workbench:**
+   - Откройте MySQL Workbench
+   - Создайте подключение к localhost
+   - Выполните: `CREATE DATABASE sweetie_db;`
+   - File → Open SQL Script → выберите `create_database.sql`
+   - Выполните скрипт (Ctrl+Shift+Enter)
+
+4. **Установите Python зависимости:**
 ```bash
 python -m venv venv
 # Windows:
@@ -243,26 +259,47 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. **Настройте MySQL автоматически:**
-```bash
-python setup_mysql.py
+5. **Настройте подключение в config.py:**
+```python
+# Замените пароль на ваш MySQL пароль
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:YOUR_PASSWORD@localhost/sweetie_db'
 ```
 
-4. **Запустите приложение:**
+6. **Добавьте тестовые данные:**
+```bash
+python init_data.py
+```
+
+7. **Запустите приложение:**
 ```bash
 python run.py
 ```
 
-5. **Откройте в браузере:** `http://localhost:5000`
+8. **Откройте в браузере:** `http://localhost:5000`
 
-### Тестовые данные:
+### 🔑 Тестовые данные:
 - **Email:** test@example.com
 - **Пароль:** password123
+
+### 📊 Проверка в MySQL Workbench:
+После запуска приложения проверьте в MySQL Workbench:
+```sql
+USE sweetie_db;
+SELECT * FROM users;
+SELECT * FROM recipes;
+SELECT * FROM categories;
+```
 
 ## Возможные проблемы и решения
 
 ### Проблема: "База данных не найдена" или "Таблицы не существуют"
-**Решение:**
+**Решение через MySQL Workbench:**
+1. Откройте MySQL Workbench
+2. Выполните: `CREATE DATABASE sweetie_db;`
+3. File → Open SQL Script → выберите `create_database.sql`
+4. Выполните скрипт (Ctrl+Shift+Enter)
+
+**Решение через скрипт:**
 ```bash
 # Запустите автоматическую настройку
 python setup_mysql.py
