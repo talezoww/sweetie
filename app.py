@@ -49,6 +49,14 @@ def login_required(f):
         if 'user_id' not in session:
             flash('Пожалуйста, войдите в систему', 'error')
             return redirect(url_for('login'))
+        
+        # Проверяем, что пользователь существует в базе данных
+        user = User.query.get(session['user_id'])
+        if not user:
+            flash('Сессия истекла. Пожалуйста, войдите в систему заново.', 'error')
+            session.clear()
+            return redirect(url_for('login'))
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -235,6 +243,13 @@ def recipe_detail(recipe_id):
 @login_required
 def add_recipe():
     if request.method == 'POST':
+        # Проверяем, что пользователь существует
+        user = User.query.get(session['user_id'])
+        if not user:
+            flash('Пользователь не найден. Пожалуйста, войдите в систему заново.', 'error')
+            session.clear()
+            return redirect(url_for('login'))
+        
         title = request.form['title']
         description = request.form['description']
         instructions = request.form['instructions']
@@ -266,7 +281,7 @@ def add_recipe():
             cook_time=cook_time,
             servings=servings,
             image_path=image_path,
-            user_id=session['user_id'],
+            user_id=user.id,  # Используем ID из базы данных
             category_id=category_id
         )
         
@@ -308,11 +323,18 @@ def add_recipe():
 @app.route('/add_comment/<int:recipe_id>', methods=['POST'])
 @login_required
 def add_comment(recipe_id):
+    # Проверяем, что пользователь существует
+    user = User.query.get(session['user_id'])
+    if not user:
+        flash('Пользователь не найден. Пожалуйста, войдите в систему заново.', 'error')
+        session.clear()
+        return redirect(url_for('login'))
+    
     content = request.form['content']
     
     comment = Comment(
         content=content,
-        user_id=session['user_id'],
+        user_id=user.id,
         recipe_id=recipe_id
     )
     
@@ -325,22 +347,41 @@ def add_comment(recipe_id):
 @app.route('/favorites')
 @login_required
 def favorites():
-    favorites = Favorite.query.filter_by(user_id=session['user_id']).all()
+    # Проверяем, что пользователь существует
+    user = User.query.get(session['user_id'])
+    if not user:
+        flash('Пользователь не найден. Пожалуйста, войдите в систему заново.', 'error')
+        session.clear()
+        return redirect(url_for('login'))
+    
+    favorites = Favorite.query.filter_by(user_id=user.id).all()
     recipes = [fav.recipe for fav in favorites]
     return render_template('favorites.html', recipes=recipes)
 
 @app.route('/my_recipes')
 @login_required
 def my_recipes():
-    recipes = Recipe.query.filter_by(user_id=session['user_id']).order_by(Recipe.created_at.desc()).all()
+    # Проверяем, что пользователь существует
+    user = User.query.get(session['user_id'])
+    if not user:
+        flash('Пользователь не найден. Пожалуйста, войдите в систему заново.', 'error')
+        session.clear()
+        return redirect(url_for('login'))
+    
+    recipes = Recipe.query.filter_by(user_id=user.id).order_by(Recipe.created_at.desc()).all()
     return render_template('my_recipes.html', recipes=recipes)
 
 @app.route('/delete_recipe/<int:recipe_id>', methods=['POST'])
 @login_required
 def delete_recipe(recipe_id):
     try:
+        # Проверяем, что пользователь существует
+        user = User.query.get(session['user_id'])
+        if not user:
+            return jsonify({'success': False, 'message': 'Пользователь не найден. Пожалуйста, войдите в систему заново.'})
+        
         # Проверяем, что рецепт принадлежит текущему пользователю
-        recipe = Recipe.query.filter_by(id=recipe_id, user_id=session['user_id']).first()
+        recipe = Recipe.query.filter_by(id=recipe_id, user_id=user.id).first()
         
         if not recipe:
             return jsonify({'success': False, 'message': 'Рецепт не найден или у вас нет прав на его удаление'})
@@ -381,15 +422,22 @@ def delete_recipe(recipe_id):
 @app.route('/add_favorite/<int:recipe_id>', methods=['POST'])
 @login_required
 def add_favorite(recipe_id):
+    # Проверяем, что пользователь существует
+    user = User.query.get(session['user_id'])
+    if not user:
+        flash('Пользователь не найден. Пожалуйста, войдите в систему заново.', 'error')
+        session.clear()
+        return redirect(url_for('login'))
+    
     # Проверяем, не добавлен ли уже рецепт в избранное
     existing_favorite = Favorite.query.filter_by(
-        user_id=session['user_id'], 
+        user_id=user.id, 
         recipe_id=recipe_id
     ).first()
     
     if not existing_favorite:
         favorite = Favorite(
-            user_id=session['user_id'],
+            user_id=user.id,
             recipe_id=recipe_id
         )
         db.session.add(favorite)
@@ -403,8 +451,15 @@ def add_favorite(recipe_id):
 @app.route('/remove_favorite/<int:recipe_id>', methods=['POST'])
 @login_required
 def remove_favorite(recipe_id):
+    # Проверяем, что пользователь существует
+    user = User.query.get(session['user_id'])
+    if not user:
+        flash('Пользователь не найден. Пожалуйста, войдите в систему заново.', 'error')
+        session.clear()
+        return redirect(url_for('login'))
+    
     favorite = Favorite.query.filter_by(
-        user_id=session['user_id'], 
+        user_id=user.id, 
         recipe_id=recipe_id
     ).first()
     
@@ -419,6 +474,11 @@ def remove_favorite(recipe_id):
 @login_required
 def rate_recipe():
     try:
+        # Проверяем, что пользователь существует
+        user = User.query.get(session['user_id'])
+        if not user:
+            return jsonify({'success': False, 'message': 'Пользователь не найден. Пожалуйста, войдите в систему заново.'})
+        
         data = request.get_json()
         recipe_id = data.get('recipe_id')
         rating = data.get('rating')
@@ -431,7 +491,7 @@ def rate_recipe():
         
         # Проверяем, есть ли уже оценка от этого пользователя
         existing_rating = Rating.query.filter_by(
-            user_id=session['user_id'],
+            user_id=user.id,
             recipe_id=recipe_id
         ).first()
         
@@ -441,7 +501,7 @@ def rate_recipe():
         else:
             # Создаем новую оценку
             new_rating = Rating(
-                user_id=session['user_id'],
+                user_id=user.id,
                 recipe_id=recipe_id,
                 rating=rating
             )
