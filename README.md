@@ -77,10 +77,44 @@ pip install -r requirements.txt
 #### 4. Настройка базы данных MySQL
 
 **4.1. Установка MySQL:**
-- Скачайте и установите MySQL с официального сайта
-- Создайте пользователя и базу данных
 
-**4.2. Создание базы данных:**
+**Для Windows:**
+- Скачайте MySQL с [mysql.com](https://dev.mysql.com/downloads/mysql/)
+- Или установите XAMPP (включает MySQL, Apache, PHP)
+- Запустите MySQL сервер
+
+**Для Linux:**
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install mysql-server
+
+# CentOS/RHEL
+sudo yum install mysql-server
+```
+
+**Для macOS:**
+```bash
+brew install mysql
+```
+
+**4.2. Автоматическая настройка базы данных:**
+
+Используйте автоматический скрипт настройки:
+```bash
+python setup_mysql.py
+```
+
+Этот скрипт:
+- Запросит данные подключения к MySQL
+- Создаст базу данных `sweetie_db`
+- Создаст все необходимые таблицы
+- Настроит конфигурацию проекта
+- Добавит тестовые данные
+
+**4.3. Ручная настройка (альтернативный способ):**
+
+Создайте базу данных вручную:
 ```sql
 CREATE DATABASE sweetie_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'sweetie_user'@'localhost' IDENTIFIED BY 'your_password';
@@ -88,16 +122,28 @@ GRANT ALL PRIVILEGES ON sweetie_db.* TO 'sweetie_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-**4.3. Настройка подключения к базе данных:**
+Затем выполните:
+```bash
+# Создание таблиц
+python create_tables.py
+
+# Или используйте SQL скрипт
+python setup_database.py
+```
+
+**4.4. Настройка подключения к базе данных:**
 Отредактируйте файл `config.py`:
 ```python
 SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://sweetie_user:your_password@localhost/sweetie_db'
 ```
 
-#### 5. Инициализация базы данных
+#### 5. Инициализация данных
 ```bash
-# Создание таблиц (выполняется автоматически при первом запуске)
-python -c "from app import app, db; app.app_context().push(); db.create_all()"
+# Добавление тестовых данных
+python init_data.py
+
+# Или добавление дополнительных рецептов
+python add_more_recipes.py
 ```
 
 #### 6. Запуск приложения
@@ -126,6 +172,7 @@ yana/
 ├── create_tables.py     # Скрипт создания таблиц
 ├── init_data.py         # Скрипт инициализации данных
 ├── setup_database.py    # Скрипт настройки БД
+├── setup_mysql.py       # Автоматическая настройка MySQL (НОВЫЙ!)
 ├── add_more_recipes.py  # Скрипт добавления рецептов
 ├── simple_add_recipes.py # Простой скрипт добавления рецептов
 ├── templates/           # HTML шаблоны Jinja2
@@ -175,13 +222,61 @@ mkdir -p static/uploads
 chmod 755 static/uploads
 ```
 
+## Быстрый старт
+
+### Для новых пользователей (рекомендуется):
+
+1. **Клонируйте репозиторий:**
+```bash
+git clone https://github.com/talezoww/sweetie.git
+cd sweetie
+```
+
+2. **Установите зависимости:**
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+3. **Настройте MySQL автоматически:**
+```bash
+python setup_mysql.py
+```
+
+4. **Запустите приложение:**
+```bash
+python run.py
+```
+
+5. **Откройте в браузере:** `http://localhost:5000`
+
+### Тестовые данные:
+- **Email:** test@example.com
+- **Пароль:** password123
+
 ## Возможные проблемы и решения
+
+### Проблема: "База данных не найдена" или "Таблицы не существуют"
+**Решение:**
+```bash
+# Запустите автоматическую настройку
+python setup_mysql.py
+
+# Или создайте таблицы вручную
+python create_tables.py
+```
 
 ### Проблема: Ошибка подключения к MySQL
 **Решение:**
 1. Убедитесь, что MySQL сервер запущен
 2. Проверьте правильность данных подключения в `config.py`
 3. Убедитесь, что пользователь имеет права на базу данных
+4. Для Windows: проверьте, что MySQL сервис запущен в службах
 
 ### Проблема: Ошибка "ModuleNotFoundError"
 **Решение:**
@@ -199,6 +294,15 @@ pip install -r requirements.txt
 1. Проверьте права доступа к папке `static/uploads`
 2. Убедитесь, что папка существует
 3. Проверьте размер загружаемого файла (максимум 16MB)
+
+### Проблема: "Access denied for user" в MySQL
+**Решение:**
+1. Проверьте имя пользователя и пароль
+2. Убедитесь, что пользователь имеет права на базу данных:
+```sql
+GRANT ALL PRIVILEGES ON sweetie_db.* TO 'your_user'@'localhost';
+FLUSH PRIVILEGES;
+```
 
 ## Использование приложения
 
